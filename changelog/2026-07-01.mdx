@@ -1,0 +1,38 @@
+---
+title: "Week of July 1, 2026"
+description: "Introducing the AI-native development lifecycle agent"
+---
+
+This week we shipped the first release of our AI-native development lifecycle agent — an end-to-end system that takes work from discovery through release using specialist AI agents and gated stage evidence.
+
+## New features
+
+**AI-native development lifecycle.** A gated, eight-stage loop covers discovery, planning, architecture, implementation, review, validation, release, and improvement. Each stage produces evidence before the next begins.
+
+**Specialist subagents.** Six role-specific agents can be invoked for focused reasoning: product, architect, implementer, reviewer, QA, and release manager. Each brings its own prompt and scope so you get the right lens for each stage.
+
+**Linear integration.** Assign work to the agent directly from Linear. The agent posts Agent Activities back to the issue, supports human-in-the-loop elicitations, and can create proactive Agent Sessions. Set up webhook credentials to enable it.
+
+**GitHub App integration.** Mention the agent in an issue or pull request comment to dispatch work. The agent gets native PR diff context, checks out the target repository into its sandbox, and can request approvals through comment threads.
+
+**Repository resolution.** For Linear-originated work, the agent automatically maps the Linear team and project to the correct GitHub repository and clones it into the sandbox. Passing an explicit repository URL in the ticket overrides the mapping.
+
+**Judge-backed evals.** Two new judge evals — lifecycle quality and release readiness — score agent output against structured rubrics. Smoke evals continue to run without model credentials.
+
+**Scheduled runs.** Daily lifecycle triage and weekly improvement review schedules run automatically to surface stalled work and reusable lessons.
+
+## Updates
+
+**Observability.** Structured `eve.metric` records now capture session, turn, action, HITL wait, token usage, failure, and message-size signals. Model inputs and outputs stay off by default; runtime tags include only low-cardinality routing data (team, issue, repository, channel). Set `EVE_ENABLE_OTEL=1` or `OTEL_EXPORTER_OTLP_ENDPOINT` to forward traces through OpenTelemetry, and `EVE_METRICS_LOG=0` to silence the structured log.
+
+**Sandbox selection.** The agent now picks a backend automatically: Vercel Sandbox on hosted deployments, then Docker, Microsandbox, and a local fallback. Only the first three support real builds and tests.
+
+**Session compaction.** Long Linear and GitHub sessions compact earlier (at 75% of context) so multi-hour implementation runs stay responsive.
+
+**Session streaming smoke test.** A new smoke script starts a session, attaches to the stream, and exits once the run completes or parks for input — useful for verifying deployments end to end.
+
+## Bug fixes
+
+**Webhook verification.** Linear and GitHub webhook signatures are now verified before dispatch. Unsigned or stale requests are rejected instead of triggering a run.
+
+**Production auth guard.** The local HTTP channel now ships with a placeholder auth walk that blocks accidental public exposure until you replace it with your real app auth.
